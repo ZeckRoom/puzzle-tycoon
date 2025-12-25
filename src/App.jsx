@@ -1,10 +1,11 @@
 // src/App.jsx
 import { useEffect, useState } from 'react';
 import { useGameStore } from './store/gameStore';
-import { GameCanvas } from './components/GameCanvas';
-import { MoneyDisplay } from './components/HUD/MoneyDisplay';
-import { TrainStatus } from './components/HUD/TrainStatus';
-import { Shop } from './components/Shop/Shop';
+import { GameCanvas } from './components/GameCanvas.jsx';
+import { MoneyDisplay } from './components/HUD/MoneyDisplay.jsx';
+import { TrainStatus } from './components/HUD/TrainStatus.jsx';
+import { Shop } from './components/Shop/Shop.jsx';
+
 import './App.css';
 
 function App() {
@@ -76,4 +77,4 @@ function App() {
     );
 }
 
-export default App;
+export default App

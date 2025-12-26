@@ -29,10 +29,14 @@ export function GameCanvas() {
     };
     
     gameRef.current = new Phaser.Game(config);
-    gameRef.current.scene.start('GameScene');  // ← Sin parámetros
+    gameRef.current.scene.start('GameScene');
+    
+    // Exponer globalmente para comunicación React ↔ Phaser
+    window.phaserGame = gameRef.current;
     
     return () => {
       if (gameRef.current) {
+        window.phaserGame = null;
         gameRef.current.destroy(true);
         gameRef.current = null;
       }

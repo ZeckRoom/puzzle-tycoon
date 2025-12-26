@@ -6,15 +6,20 @@ import { GameCanvas } from './components/GameCanvas.jsx';
 import { MoneyDisplay } from './components/HUD/MoneyDisplay.jsx';
 import { TrainStatus } from './components/HUD/TrainStatus.jsx';
 import { Shop } from './components/Shop/Shop.jsx';
+import { TilePicker } from './components/TilePicker/TilePicker.jsx';
+import { TILE_SELECTOR } from './game/config/tiles';
 import './App.css';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [selectedTile, setSelectedTile] = useState(TILE_SELECTOR[0]);
   
   const [showOfflineEarnings, setShowOfflineEarnings] = useState(false);
   const [offlineAmount, setOfflineAmount] = useState(0);
+  
+  const money = useGameStore((state) => state.money);
   const calculateOfflineEarnings = useGameStore((state) => state.calculateOfflineEarnings);
   const setMode = useGameStore((state) => state.setMode);
   
@@ -46,6 +51,15 @@ function App() {
     setMode(mode);
     setShowMenu(false);
     setGameStarted(true);
+  };
+  
+  const handleSelectTile = (tileName) => {
+    setSelectedTile(tileName);
+    const tileIndex = TILE_SELECTOR.indexOf(tileName);
+    // Comunicar a Phaser el cambio
+    if (window.phaserGame?.scene?.scenes[0]) {
+      window.phaserGame.scene.scenes[0].updateSelectedTile(tileIndex);
+    }
   };
   
   const formatNumber = (num) => {
@@ -88,14 +102,18 @@ function App() {
           <TrainStatus />
           <GameCanvas />
           <div className="controls-hint">
-            <span>💡 Click para colocar vías</span>
-            <span>ESPACIO para cambiar tipo</span>
-            <span>Click en vía existente para eliminar</span>
+            <span>💡 Select a rail type, then click to place</span>
+            <span>Click existing rail to remove</span>
           </div>
         </div>
         
         {/* Sidebar */}
         <aside className="sidebar">
+          <TilePicker 
+            selectedTile={selectedTile}
+            onSelectTile={handleSelectTile}
+            money={money}
+          />
           <Shop />
         </aside>
       </div>

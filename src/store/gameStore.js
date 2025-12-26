@@ -5,7 +5,7 @@ export const useGameStore = create(
     persist(
         (set, get) => ({
             // Economy
-            money: 100,
+            money: 500,
             moneyPerSecond: 0,
             totalEarnings: 0,
 

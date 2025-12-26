@@ -1,20 +1,19 @@
-// src/game/scenes/GameScene.js
 import Phaser from 'phaser';
 import { TILE_TYPES, TILE_SELECTOR } from '../config/tiles';
 import { PathValidator } from '../systems/PathValidator';
 import { Train } from '../entities/Train';
+import { useGameStore } from '../../store/gameStore.js';  // ← AÑADE ESTA LÍNEA
 
 export default class GameScene extends Phaser.Scene {
-    constructor() {
-        super('GameScene');
-        this.GRID_SIZE = 8;
-        this.TILE_SIZE = 64;
-        this.selectedTileType = 0;
-    }
-
-    init(data) {
-        this.gameStore = data.gameStore;
-    }
+  constructor() {
+    super('GameScene');
+    this.GRID_SIZE = 8;
+    this.TILE_SIZE = 64;
+    this.selectedTileType = 0;
+  }
+  
+  init(data) {
+  }
 
     preload() {
         // Crear textura simple para partículas
@@ -138,7 +137,7 @@ export default class GameScene extends Phaser.Scene {
             if (this.tiles[key]) {
                 this.tiles[key].sprite.destroy();
                 delete this.tiles[key];
-                this.gameStore.getState().removeTile(gridX, gridY);
+                useGameStore.getState().removeTile(gridX, gridY);
                 this.validateAndUpdatePath();
                 return;
             }
@@ -147,7 +146,7 @@ export default class GameScene extends Phaser.Scene {
             const tileTypeName = TILE_SELECTOR[this.selectedTileType];
             const tileData = TILE_TYPES[tileTypeName];
 
-            const success = this.gameStore.getState().placeTile(gridX, gridY, tileTypeName, tileData.cost);
+            const success = useGameStore.getState().placeTile(gridX, gridY, tileTypeName, tileData.cost);
 
             if (success) {
                 const sprite = this.createTileSprite(gridX, gridY, tileData);
@@ -171,24 +170,24 @@ export default class GameScene extends Phaser.Scene {
             const smoothPath = validator.generateSmoothPath(result, this.TILE_SIZE);
 
             if (!this.train) {
-                this.train = new Train(this, smoothPath, this.gameStore.getState().trainSpeed);
+                this.train = new Train(this, smoothPath, useGameStore.getState().trainSpeed);
                 this.train.start();
             } else {
                 this.train.updatePath(smoothPath);
             }
 
-            this.gameStore.getState().setTrainRunning(true);
+            useGameStore.getState().setTrainRunning(true);
 
             // Calcular ganancias por segundo
-            const earnings = result.stations * 100 * this.gameStore.getState().multiplier;
-            this.gameStore.getState().updateMoneyPerSecond(earnings);
+            const earnings = result.stations * 100 * useGameStore.getState().multiplier;
+            useGameStore.getState().updateMoneyPerSecond(earnings);
 
         } else {
             if (this.train) {
                 this.train.stop();
             }
-            this.gameStore.getState().setTrainRunning(false);
-            this.gameStore.getState().updateMoneyPerSecond(0);
+            useGameStore.getState().setTrainRunning(false);
+            useGameStore.getState().updateMoneyPerSecond(0);
         }
     }
 
@@ -211,7 +210,7 @@ export default class GameScene extends Phaser.Scene {
 
     syncWithStore() {
         // Cargar tiles desde el store
-        const storedTiles = this.gameStore.getState().tiles;
+        const storedTiles = useGameStore.getState().tiles;
         Object.entries(storedTiles).forEach(([key, typeName]) => {
             const [x, y] = key.split(',').map(Number);
             if (key !== '0,0') {
@@ -227,11 +226,11 @@ export default class GameScene extends Phaser.Scene {
     update(time, delta) {
         if (this.train) {
             this.train.update(delta, (amount) => {
-                this.gameStore.getState().addMoney(amount);
+                useGameStore.getState().addMoney(amount);
             });
 
             // Actualizar velocidad del tren
-            const currentSpeed = this.gameStore.getState().trainSpeed;
+            const currentSpeed = useGameStore.getState().trainSpeed;
             this.train.updateSpeed(currentSpeed);
         }
     }

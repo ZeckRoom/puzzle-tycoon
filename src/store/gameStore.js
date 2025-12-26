@@ -9,27 +9,28 @@ export const useGameStore = create(
       moneyPerSecond: 0,
       totalEarnings: 0,
       
-      // Train
-      trainSpeed: 1,
+      // Train Stats
+      trainSpeed: 1, // Multiplicador de velocidad base
       trainRunning: false,
       
       // Upgrades
-      multiplier: 1,
+      multiplier: 1, // Multiplicador de ganancias
       
       // Grid
       tiles: {
         '0,0': 'DEPOT'
       },
       
-      // Game Mode
+      // Game Mode & Progression
       mode: 'free', // 'free' o 'campaign'
       currentLevel: 0,
       
-      // Offline earnings
+      // Offline earnings system
       lastOnline: Date.now(),
       sessionStart: Date.now(),
       
-      // Actions
+      // --- ACTIONS ---
+
       addMoney: (amount) => set((state) => ({
         money: state.money + amount,
         totalEarnings: state.totalEarnings + amount
@@ -70,6 +71,7 @@ export const useGameStore = create(
       
       updateMoneyPerSecond: (amount) => set({ moneyPerSecond: amount }),
       
+      // Upgrades System
       buyUpgrade: (upgradeName, cost, effect) => {
         const state = get();
         if (state.money >= cost) {
@@ -115,10 +117,14 @@ export const useGameStore = create(
         const now = Date.now();
         const timeAway = Math.floor((now - state.lastOnline) / 1000); // segundos
         
-        if (timeAway > 60 && state.trainRunning) {
-          const maxOfflineTime = 3600; // 1 hora máximo
+        // Solo gana offline si el juego estaba "activo" o tienes vías construidas
+        if (timeAway > 60 && Object.keys(state.tiles).length > 5) {
+          const maxOfflineTime = 7200; // 2 horas máximo
           const actualTime = Math.min(timeAway, maxOfflineTime);
-          const earnings = Math.floor((state.moneyPerSecond * actualTime) * 0.5); // 50% de eficiencia offline
+          
+          // Ganancia estimada: $10 por segundo base * multiplicador * (tiles / 10)
+          const estimatedPPS = 5 * state.multiplier * (Object.keys(state.tiles).length / 5);
+          const earnings = Math.floor(estimatedPPS * actualTime * 0.5); // 50% eficiencia
           
           if (earnings > 0) {
             set({
@@ -134,14 +140,14 @@ export const useGameStore = create(
         return 0;
       },
       
-      // Métodos para el sistema de saves
+      // Save System Methods
       loadFromSlot: (slotData) => {
         set({
           money: slotData.money || 500,
           totalEarnings: slotData.totalEarnings || 0,
           tiles: slotData.tiles || { '0,0': 'DEPOT' },
-          trainRunning: slotData.trainRunning || false,
-          moneyPerSecond: slotData.moneyPerSecond || 0,
+          trainRunning: false, // Siempre empieza detenido
+          moneyPerSecond: 0,
           trainSpeed: slotData.trainSpeed || 1,
           multiplier: slotData.multiplier || 1,
           currentLevel: slotData.currentLevel || 0,
@@ -185,7 +191,6 @@ export const useGameStore = create(
     {
       name: 'lovecorp-game-storage',
       partialize: (state) => ({
-        // Solo guardar estos campos en localStorage (para compatibilidad)
         lastOnline: state.lastOnline
       })
     }

@@ -8,32 +8,28 @@ export default class GameScene extends Phaser.Scene {
     this.GRID_SIZE = 10;
     this.TILE_SIZE = 64;
     this.selectedTileType = 0;
-    this.trains = []; // Array para múltiples trenes si fuera necesario
+    this.trains = []; // Array para manejar múltiples trenes simultáneos
   }
 
   create() {
     this.tiles = {};
     
-    // Crear el Grid Visual (Papel milimetrado antiguo)
     this.createBackground();
-    
-    // Depósito Inicial
     this.createDepot();
-    
-    // Input
     this.setupInput();
     this.createPreview();
     
-    // Sincronizar estado inicial
+    // Sincronizar con React al inicio
     this.syncWithStore();
   }
 
   createBackground() {
-    // Fondo base
+    // Fondo base color papel
     this.add.rectangle(320, 320, 640, 640, 0xe8dcc4).setDepth(-2);
     
+    // Grid estilo plano técnico tenue
     const graphics = this.add.graphics();
-    graphics.lineStyle(1, 0x8b6f47, 0.2); // Líneas sepia tenues
+    graphics.lineStyle(1, 0x8b6f47, 0.2);
 
     for (let i = 0; i <= this.GRID_SIZE; i++) {
       graphics.moveTo(i * this.TILE_SIZE, 0);
@@ -49,14 +45,13 @@ export default class GameScene extends Phaser.Scene {
     this.tiles['0,0'] = { sprite: depot, tileData: TILE_TYPES.DEPOT };
   }
 
-  // --- LÓGICA DE DIBUJO MEJORADA ---
   createTileSprite(gridX, gridY, tileData) {
     const x = gridX * this.TILE_SIZE + this.TILE_SIZE / 2;
     const y = gridY * this.TILE_SIZE + this.TILE_SIZE / 2;
     const container = this.add.container(x, y);
 
-    // 1. Base (Balasto)
-    const base = this.add.rectangle(0, 0, 64, 64, 0xdcd0b4); // Color arena/tierra suave
+    // 1. Base de tierra/balasto
+    const base = this.add.rectangle(0, 0, 64, 64, 0xdcd0b4);
     container.add(base);
 
     // 2. Rieles y Traviesas
@@ -79,89 +74,83 @@ export default class GameScene extends Phaser.Scene {
 
   drawPerfectRails(g, data) {
     const c = data.connects;
-    const half = 32;
+    const railSpacing = 12; // Distancia del centro a cada riel
     const railWidth = 6;
-    const railSpacing = 12; // Distancia del centro al riel
-    const sleeperColor = 0x5d4037; // Marrón madera
-    const railColor = 0x546e7a; // Gris acero azulado
-
-    // Función auxiliar para dibujar traviesas rotadas
-    const drawSleeper = (x, y, angle) => {
-        g.fillStyle(sleeperColor, 1);
-        // Guardar contexto manual si fuera canvas puro, aquí rotamos puntos
-        // Simplificación: Dibujar rectángulo pequeño
-        g.fillRect(x - 2, y - 8, 4, 16); // Traviesa vertical por defecto
-    };
+    const sleeperColor = 0x5d4037; // Marrón oscuro madera
+    const railColor = 0x546e7a; // Gris metal azulado
 
     // --- RECTAS ---
     if (c.left && c.right) {
-        // Horizontal
-        // Traviesas
+        // Horizontal: Solo 3 traviesas bien espaciadas
         g.fillStyle(sleeperColor, 1);
-        for(let i=-24; i<=24; i+=12) g.fillRect(i, -8, 6, 16);
-        // Rieles
+        g.fillRect(-20, -8, 6, 16);
+        g.fillRect(0, -8, 6, 16);
+        g.fillRect(20, -8, 6, 16);
+        
+        // Rieles horizontales
         g.fillStyle(railColor, 1);
         g.fillRect(-32, -railSpacing - railWidth/2, 64, railWidth);
         g.fillRect(-32, railSpacing - railWidth/2, 64, railWidth);
     }
     else if (c.up && c.down) {
-        // Vertical
+        // Vertical: Solo 3 traviesas
         g.fillStyle(sleeperColor, 1);
-        for(let i=-24; i<=24; i+=12) g.fillRect(-8, i, 16, 6);
+        g.fillRect(-8, -20, 16, 6);
+        g.fillRect(-8, 0, 16, 6);
+        g.fillRect(-8, 20, 16, 6);
+        
+        // Rieles verticales
         g.fillStyle(railColor, 1);
         g.fillRect(-railSpacing - railWidth/2, -32, railWidth, 64);
         g.fillRect(railSpacing - railWidth/2, -32, railWidth, 64);
     }
-    
-    // --- CURVAS (La parte importante) ---
-    // Usamos arcos precisos. El centro de la curva está en la esquina del tile.
+    // --- CURVAS ---
     else {
-        let centerX, centerY, startAngle, endAngle;
-
-        if (c.up && c.right)    { centerX = 32; centerY = -32; startAngle = 90; endAngle = 180; }
-        if (c.right && c.down)  { centerX = 32; centerY = 32;  startAngle = 180; endAngle = 270; }
-        if (c.down && c.left)   { centerX = -32; centerY = 32; startAngle = 270; endAngle = 360; }
-        if (c.left && c.up)     { centerX = -32; centerY = -32; startAngle = 0; endAngle = 90; }
-
-        // Convertir a radianes Phaser (0 es derecha, 90 es abajo)
-        // Ajuste de coordenadas para Phaser Arc
+        // Determinar cuadrante y ángulos
         let pCenterX, pCenterY, pStart, pEnd;
         
         if (c.up && c.right) { 
             pCenterX = 32; pCenterY = -32; 
-            pStart = Phaser.Math.DegToRad(90); pEnd = Phaser.Math.DegToRad(180);
+            pStart = 90; pEnd = 180;
         }
         if (c.right && c.down) {
             pCenterX = 32; pCenterY = 32;
-            pStart = Phaser.Math.DegToRad(180); pEnd = Phaser.Math.DegToRad(270);
+            pStart = 180; pEnd = 270;
         }
         if (c.down && c.left) {
             pCenterX = -32; pCenterY = 32;
-            pStart = Phaser.Math.DegToRad(270); pEnd = Phaser.Math.DegToRad(360);
+            pStart = 270; pEnd = 360;
         }
         if (c.left && c.up) {
             pCenterX = -32; pCenterY = -32;
-            pStart = Phaser.Math.DegToRad(0); pEnd = Phaser.Math.DegToRad(90);
+            pStart = 0; pEnd = 90;
         }
 
-        // Riel Interior
+        const startRad = Phaser.Math.DegToRad(pStart);
+        const endRad = Phaser.Math.DegToRad(pEnd);
+
+        // Traviesas en curva (radiales, simplificadas como círculos pequeños para evitar matemáticas complejas de rotación de rectángulos en canvas básico)
+        g.fillStyle(sleeperColor, 1);
+        for(let a = pStart + 15; a < pEnd; a += 30) {
+            const rad = Phaser.Math.DegToRad(a);
+            const dist = 32; // Radio medio del tile
+            const sx = pCenterX + Math.cos(rad) * dist;
+            const sy = pCenterY + Math.sin(rad) * dist;
+            g.fillCircle(sx, sy, 4); 
+        }
+
+        // Rieles curvos (Interior y Exterior)
         g.lineStyle(railWidth, railColor, 1);
         g.beginPath();
-        g.arc(pCenterX, pCenterY, 32 - railSpacing, pStart, pEnd);
+        g.arc(pCenterX, pCenterY, 32 - railSpacing, startRad, endRad);
         g.strokePath();
 
-        // Riel Exterior
-        g.lineStyle(railWidth, railColor, 1);
         g.beginPath();
-        g.arc(pCenterX, pCenterY, 32 + railSpacing, pStart, pEnd);
+        g.arc(pCenterX, pCenterY, 32 + railSpacing, startRad, endRad);
         g.strokePath();
-        
-        // Traviesas en curva (simplificado: 3 traviesas en angulos medios)
-        // Se verian mejor calculando angulo, pero para pixel art simple esto basta
     }
   }
 
-  // --- INPUT & REEMBOLSO ---
   setupInput() {
     this.input.on('pointerdown', (pointer) => {
         const gridX = Math.floor(pointer.x / this.TILE_SIZE);
@@ -172,28 +161,26 @@ export default class GameScene extends Phaser.Scene {
         const key = `${gridX},${gridY}`;
         if (key === '0,0') return; // Prohibido tocar deposito
 
-        // 1. Lógica de ELIMINAR y REEMBOLSO
+        // 1. ELIMINAR TILE (con reembolso)
         if (this.tiles[key]) {
             const tileData = this.tiles[key].tileData;
-            // Destruir sprite
+            
+            // Efecto visual y lógica
             this.tiles[key].sprite.destroy();
             delete this.tiles[key];
             
-            // Actualizar Store
             useGameStore.getState().removeTile(gridX, gridY);
             
-            // REEMBOLSO 50%
+            // Reembolso 50%
             const refund = Math.floor(tileData.cost / 2);
             useGameStore.getState().addMoney(refund);
             
-            // Feedback Visual de Dinero (+ $50)
-            this.showFloatingText(gridX, gridY, `+$${refund}`, '#2ecc71');
-            
-            this.checkPathValidity(); // Re-validar camino
+            this.showFloatingText(gridX, gridY, `+$${refund}`, '#2ecc71'); // Texto verde
+            this.checkPathValidity();
             return;
         }
 
-        // 2. Lógica de CONSTRUIR
+        // 2. CONSTRUIR TILE
         const tileTypeName = TILE_SELECTOR[this.selectedTileType];
         const tileData = TILE_TYPES[tileTypeName];
         const success = useGameStore.getState().placeTile(gridX, gridY, tileTypeName, tileData.cost);
@@ -201,7 +188,8 @@ export default class GameScene extends Phaser.Scene {
         if (success) {
             const sprite = this.createTileSprite(gridX, gridY, tileData);
             this.tiles[key] = { sprite, tileData };
-            this.showFloatingText(gridX, gridY, `-$${tileData.cost}`, '#e74c3c');
+            
+            this.showFloatingText(gridX, gridY, `-$${tileData.cost}`, '#e74c3c'); // Texto rojo
             this.checkPathValidity();
         }
     });
@@ -222,128 +210,188 @@ export default class GameScene extends Phaser.Scene {
     });
   }
 
-  // --- LÓGICA DE TREN (DESPACHO MANUAL) ---
+  // --- LÓGICA DE TREN (Despacho Manual) ---
   
-  // Llamado desde React cuando se pulsa el botón
   dispatchTrain() {
-    // 1. Calcular camino desde 0,0
     const path = this.calculatePath();
-    if (!path) return;
+    if (!path || path.length < 2) return; // Necesita al menos 2 puntos para moverse
 
-    // 2. Crear Tren
-    const train = this.add.container(path[0].x, path[0].y);
-    const sprite = this.add.text(0,0, '🚂', {fontSize: '40px'}).setOrigin(0.5);
-    train.add(sprite);
-    train.setData('pathIndex', 0);
-    train.setData('progress', 0);
+    const startX = path[0].x;
+    const startY = path[0].y;
     
-    // Guardar referencia para update
-    this.trains.push({ obj: train, path: path, finished: false });
+    // Contenedor visual del tren
+    const trainContainer = this.add.container(startX, startY);
+    const sprite = this.add.text(0,0, '🚂', {fontSize: '36px'}).setOrigin(0.5);
+    trainContainer.add(sprite);
+    
+    // Velocidad: Base 0.05 (lento) * Multiplicador de mejoras (1 a 5)
+    const storeSpeed = useGameStore.getState().trainSpeed; 
+    const realSpeed = 0.05 * storeSpeed; 
+
+    this.trains.push({ 
+        obj: trainContainer, 
+        path: path, 
+        progress: 0, 
+        pathIndex: 0, 
+        finished: false,
+        speed: realSpeed 
+    });
   }
 
   checkPathValidity() {
-    // Esta función verifica si hay un camino válido de Depósito a CUALQUIER Estación
+    // Verificar si hay suficientes tiles conectados para habilitar el botón
     const path = this.calculatePath();
-    // Comunicar a React si el botón debe activarse
     if (window.setDispatchReady) {
-        window.setDispatchReady(!!path);
+        window.setDispatchReady(!!(path && path.length > 1));
     }
   }
 
   calculatePath() {
-    // Algoritmo de búsqueda simple (DFS/BFS)
-    // Empezamos en 0,0 (Depot)
-    // Buscamos conectar con una 'STATION'
-    // Retorna array de puntos {x, y} o null
+    // Pathfinding Básico: Sigue tiles adyacentes conectados desde el depot
+    // En el futuro, esto debería usar A* real y verificar conexiones de tiles específicas
     
-    // (Implementación simplificada para brevedad: asume camino lineal sin bifurcaciones complejas)
-    // En un sistema Grid real, necesitaríamos un pathfinder A*. 
-    // Aquí haremos un "seguidor de vías".
+    if (Object.keys(this.tiles).length < 2) return null;
     
-    let current = {x: 0, y: 0};
-    let pathPoints = [];
-    let visited = new Set();
+    // Obtener todos los puntos centrales de los tiles existentes
+    const points = [];
+    Object.keys(this.tiles).forEach(k => {
+        const [kx, ky] = k.split(',').map(Number);
+        points.push({x: kx*64+32, y: ky*64+32, gx: kx, gy: ky});
+    });
     
-    // Dirección inicial (Asumimos que sale del depot hacia algun lado conectado)
-    // Para simplificar, asumimos que el tile 0,0 conecta a todos lados o revisamos vecinos.
+    // Algoritmo "Nearest Neighbor" para ordenar los puntos y simular un camino continuo
+    // Empezamos siempre en 0,0 (Depot)
+    const startPoint = points.find(p => p.gx === 0 && p.gy === 0) || points[0];
+    const sortedPath = [startPoint];
+    const remaining = points.filter(p => p !== startPoint);
     
-    // ... Lógica de pathfinding real aquí ...
-    // Como es complejo escribir un A* completo en un solo mensaje, 
-    // vamos a usar el validador existente pero adaptado.
+    let current = startPoint;
     
-    // IMPORTANTE: Simularemos que siempre es válido si hay más de 2 tiles para probar la UI
-    // En producción usaríamos la clase PathValidator.
-    
-    if (Object.keys(this.tiles).length > 2) {
-        // Generar un camino falso visual basado en los tiles existentes para demo
-        // Ojo: Esto es temporal para que veas el tren moverse.
-        const p = [];
-        Object.keys(this.tiles).forEach(k => {
-            const [kx, ky] = k.split(',').map(Number);
-            p.push({x: kx*64+32, y: ky*64+32});
-        });
-        // Ordenar por cercanía (muy básico hack)
-        return p.sort((a,b) => (a.x+a.y) - (b.x+b.y));
+    // Intentamos construir una cadena de adyacentes
+    while(remaining.length > 0) {
+        let nearestIdx = -1;
+        // Solo buscamos vecinos directos (distancia Manhattan = 1)
+        
+        for(let i=0; i<remaining.length; i++) {
+            const p = remaining[i];
+            const dist = Math.abs(p.gx - current.gx) + Math.abs(p.gy - current.gy);
+            
+            // Si es vecino directo, lo conectamos
+            if(dist === 1) {
+                nearestIdx = i;
+                break; // Encontramos el siguiente eslabón
+            }
+        }
+        
+        if (nearestIdx !== -1) {
+            current = remaining[nearestIdx];
+            sortedPath.push(current);
+            remaining.splice(nearestIdx, 1);
+        } else {
+            // Camino roto o bifurcación no manejada por este algoritmo simple
+            break; 
+        }
     }
-    return null; 
+    
+    // Solo retornamos si hay un camino válido de al menos 2 pasos
+    return sortedPath.length > 1 ? sortedPath : null;
   }
 
   update(time, delta) {
-    // Mover trenes
+    // Actualizar todos los trenes activos
     for (let i = this.trains.length - 1; i >= 0; i--) {
         const t = this.trains[i];
         if (t.finished) continue;
 
-        // Lógica de movimiento punto a punto
-        const speed = 0.2; // Velocidad del tren
-        t.obj.setData('progress', t.obj.getData('progress') + speed * (delta/16));
+        // Avance basado en delta time para suavidad (60fps target)
+        t.progress += t.speed * (delta / 16.6); 
+
+        // Cambio de segmento
+        if (t.progress >= 1) {
+            t.progress = 0;
+            t.pathIndex++;
+            
+            // Fin del trayecto
+            if (t.pathIndex >= t.path.length - 1) {
+                t.finished = true;
+                this.trainArrival(t.obj, t.path.length);
+                this.trains.splice(i, 1);
+                continue;
+            }
+        }
+
+        // Interpolación Lineal (Lerp) entre el punto actual y el siguiente
+        const p1 = t.path[t.pathIndex];
+        const p2 = t.path[t.pathIndex + 1];
         
-        let idx = t.obj.getData('pathIndex');
-        if (t.obj.getData('progress') >= 1) {
-            t.obj.setData('progress', 0);
-            t.obj.setData('pathIndex', idx + 1);
-            idx++;
-        }
-
-        if (idx >= t.path.length - 1) {
-            // LLEGÓ AL FINAL
-            t.finished = true;
-            this.trainArrival(t.obj, t.path.length); // Pagar
-            this.trains.splice(i, 1); // Quitar de la lista
-            continue;
-        }
-
-        const p1 = t.path[idx];
-        const p2 = t.path[idx+1];
-        const prog = t.obj.getData('progress');
-
-        t.obj.x = p1.x + (p2.x - p1.x) * prog;
-        t.obj.y = p1.y + (p2.y - p1.y) * prog;
+        t.obj.x = p1.x + (p2.x - p1.x) * t.progress;
+        t.obj.y = p1.y + (p2.y - p1.y) * t.progress;
+        
+        // Rotar tren hacia la dirección de movimiento
+        const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+        t.obj.setRotation(angle);
     }
   }
 
-  trainArrival(trainObj, distanceTiles) {
-    // Efecto visual
-    this.showFloatingText(
-        Math.floor(trainObj.x/64), 
-        Math.floor(trainObj.y/64), 
-        "ARRIVED!", 
-        '#f1c40f'
-    );
-    
-    // PAGO: Distancia * Multiplicador
-    const payment = distanceTiles * 50 * useGameStore.getState().multiplier;
+  trainArrival(trainObj, distance) {
+    // Pago: Distancia recorrida * $20 * Multiplicador de mejoras
+    const payment = distance * 20 * useGameStore.getState().multiplier;
     useGameStore.getState().addMoney(payment);
     
-    // Destruir tren tras un momento
-    this.time.delayedCall(1000, () => {
-        trainObj.destroy();
+    // Feedback visual flotante
+    this.showFloatingText(Math.floor(trainObj.x/64), Math.floor(trainObj.y/64), `+$${payment}`, '#f1c40f');
+    
+    // Eliminar tren
+    trainObj.destroy();
+  }
+  
+  // --- MÉTODOS DE PREVIEW (Sin cambios lógicos, solo necesarios para React) ---
+  createPreview() {
+    this.previewContainer = this.add.container(0, 0);
+    this.previewContainer.setAlpha(0.6);
+    this.previewContainer.setDepth(1000);
+    this.previewContainer.setVisible(false);
+    
+    this.updatePreview();
+    
+    this.input.on('pointermove', (pointer) => {
+      const gridX = Math.floor(pointer.x / this.TILE_SIZE);
+      const gridY = Math.floor(pointer.y / this.TILE_SIZE);
+      
+      if (gridX >= 0 && gridX < this.GRID_SIZE && gridY >= 0 && gridY < this.GRID_SIZE) {
+        const x = gridX * this.TILE_SIZE + this.TILE_SIZE / 2;
+        const y = gridY * this.TILE_SIZE + this.TILE_SIZE / 2;
+        this.previewContainer.setPosition(x, y);
+        this.previewContainer.setVisible(true);
+      } else {
+        this.previewContainer.setVisible(false);
+      }
     });
   }
-
-  // ... (CreatePreview y UpdateSelectedTile igual que antes) ...
-  createPreview() { /* ... */ }
-  updateSelectedTile(i) { this.selectedTileType = i; this.createPreview(); }
-  updatePreview() { /* ... */ }
-  syncWithStore() { /* ... */ }
+  
+  updateSelectedTile(i) {
+    this.selectedTileType = i;
+    this.updatePreview();
+  }
+  
+  updatePreview() {
+    this.previewContainer.removeAll(true);
+    const tileTypeName = TILE_SELECTOR[this.selectedTileType];
+    const tileData = TILE_TYPES[tileTypeName];
+    const tempSprite = this.createTileSprite(0, 0, tileData);
+    this.previewContainer.add(tempSprite);
+  }
+  
+  syncWithStore() {
+    const storedTiles = useGameStore.getState().tiles;
+    Object.entries(storedTiles).forEach(([key, typeName]) => {
+      const [x, y] = key.split(',').map(Number);
+      if (key !== '0,0') {
+        const tileData = TILE_TYPES[typeName];
+        const sprite = this.createTileSprite(x, y, tileData);
+        this.tiles[key] = { sprite, tileData };
+      }
+    });
+    this.checkPathValidity();
+  }
 }

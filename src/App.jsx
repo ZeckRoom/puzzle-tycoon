@@ -1,18 +1,9 @@
 import { useEffect, useState } from 'react';
-<<<<<<< HEAD
-import { useGameStore } from './store/gameStore.js';
-=======
 import { useGameStore } from './store/gameStore';
->>>>>>> 7b2d8fc276d62f5962239ef0ca75900743529e24
 import { GameCanvas } from './components/GameCanvas.jsx';
 import { MoneyDisplay } from './components/HUD/MoneyDisplay.jsx';
 import { TrainStatus } from './components/HUD/TrainStatus.jsx';
 import { Shop } from './components/Shop/Shop.jsx';
-<<<<<<< HEAD
-import './App.css';
-=======
->>>>>>> 7b2d8fc276d62f5962239ef0ca75900743529e24
-
 import './App.css';
 
 function App() {

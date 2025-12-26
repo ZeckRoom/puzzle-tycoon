@@ -1,56 +1,56 @@
-/* src/components/HUD/MoneyDisplay.css */
-.money - display - container {
-    display: flex;
-    flex - direction: column;
-    gap: 10px;
+.money-display-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.money - main {
-    text - align: right;
+.money-main {
+  text-align: right;
 }
 
-.money - label {
-    font - size: 12px;
-    color: rgba(255, 255, 255, 0.7);
-    text - transform: uppercase;
-    letter - spacing: 1px;
+.money-label {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.money - amount {
-    font - size: 48px;
-    font - weight: 800;
-    background: linear - gradient(135deg, #f1c40f 0 %, #f39c12 100 %);
-    -webkit - background - clip: text;
-    -webkit - text - fill - color: transparent;
-    animation: moneyPulse 2s ease -in -out infinite;
-    line - height: 1;
+.money-amount {
+  font-size: 48px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #f1c40f 0%, #f39c12 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: moneyPulse 2s ease-in-out infinite;
+  line-height: 1;
 }
 
 @keyframes moneyPulse {
-    0 %, 100 % { transform: scale(1); }
-    50 % { transform: scale(1.05); }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
-.money - stats {
-    display: flex;
-    gap: 20px;
-    justify - content: flex - end;
+.money-stats {
+  display: flex;
+  gap: 20px;
+  justify-content: flex-end;
 }
 
 .stat {
-    display: flex;
-    flex - direction: column;
-    align - items: flex - end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
-.stat - label {
-    font - size: 11px;
-    color: rgba(255, 255, 255, 0.6);
-    text - transform: uppercase;
+.stat-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
 }
 
-.stat - value {
-    font - size: 18px;
-    font - weight: 600;
-    color: #f1c40f;
+.stat-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #f1c40f;
 }

@@ -1,98 +1,97 @@
-// src/game/entities/Train.js
 export class Train {
-    constructor(scene, path, speed = 1) {
-        this.scene = scene;
-        this.path = path;
-        this.speed = speed;
-        this.t = 0;
-        this.isRunning = false;
-        this.earnings = 0;
-        this.stationsPassed = new Set();
-
-        // Crear sprite del tren
-        this.sprite = scene.add.circle(0, 0, 12, 0xf1c40f);
-        this.sprite.setStrokeStyle(3, 0xf39c12);
-
-        // Efecto de humo
-        this.particles = scene.add.particles(0, 0, 'particle', {
-            speed: { min: 20, max: 40 },
-            scale: { start: 0.5, end: 0 },
-            alpha: { start: 0.6, end: 0 },
-            lifespan: 600,
-            frequency: 100,
-            tint: 0x95a5a6
-        });
-        this.particles.stop();
+  constructor(scene, path, speed = 1) {
+    this.scene = scene;
+    this.path = path;
+    this.speed = speed * 50; // Velocidad en píxeles por segundo
+    this.currentIndex = 0;
+    this.progress = 0;
+    this.isRunning = false;
+    this.earningsTimer = 0;
+    this.earningsInterval = 5000; // Ganar cada 5 segundos
+    
+    // Crear sprite del tren
+    this.sprite = scene.add.text(path[0].x, path[0].y, '🚂', {
+      fontSize: '32px'
+    });
+    this.sprite.setOrigin(0.5);
+    this.sprite.setDepth(100);
+    
+    // Efecto de humo
+    this.smokeEmitter = scene.add.particles(0, 0, 'particle', {
+      speed: { min: 20, max: 40 },
+      scale: { start: 0.4, end: 0 },
+      alpha: { start: 0.6, end: 0 },
+      lifespan: 500,
+      frequency: 100,
+      tint: 0x888888,
+      blendMode: 'ADD'
+    });
+    this.smokeEmitter.stop();
+  }
+  
+  start() {
+    this.isRunning = true;
+    this.smokeEmitter.start();
+  }
+  
+  stop() {
+    this.isRunning = false;
+    this.smokeEmitter.stop();
+  }
+  
+  updatePath(newPath) {
+    this.path = newPath;
+    this.currentIndex = 0;
+    this.progress = 0;
+  }
+  
+  updateSpeed(newSpeed) {
+    this.speed = newSpeed * 50;
+  }
+  
+  update(delta, onEarning) {
+    if (!this.isRunning || this.path.length < 2) return;
+    
+    // Movimiento del tren
+    const deltaSeconds = delta / 1000;
+    const currentPoint = this.path[this.currentIndex];
+    const nextPoint = this.path[(this.currentIndex + 1) % this.path.length];
+    
+    const dx = nextPoint.x - currentPoint.x;
+    const dy = nextPoint.y - currentPoint.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    this.progress += (this.speed * deltaSeconds) / distance;
+    
+    if (this.progress >= 1) {
+      this.progress = 0;
+      this.currentIndex = (this.currentIndex + 1) % this.path.length;
     }
-
-    start() {
-        this.isRunning = true;
-        this.t = 0;
-        this.stationsPassed.clear();
-        this.particles.start();
+    
+    // Interpolación de posición
+    const newX = currentPoint.x + dx * this.progress;
+    const newY = currentPoint.y + dy * this.progress;
+    
+    this.sprite.setPosition(newX, newY);
+    
+    // Rotación del tren según dirección
+    const angle = Math.atan2(dy, dx);
+    this.sprite.setRotation(angle);
+    
+    // Actualizar partículas de humo
+    this.smokeEmitter.setPosition(newX - Math.cos(angle) * 15, newY - Math.sin(angle) * 15);
+    
+    // Sistema de ganancias
+    this.earningsTimer += delta;
+    if (this.earningsTimer >= this.earningsInterval) {
+      this.earningsTimer = 0;
+      const earnings = Math.floor(100 * (this.speed / 50)); // Más dinero con más velocidad
+      onEarning(earnings);
     }
-
-    stop() {
-        this.isRunning = false;
-        this.particles.stop();
-    }
-
-    update(delta, addMoneyCallback) {
-        if (!this.isRunning || this.path.length < 2) return;
-
-        // Incrementar posición en el path (Catmull-Rom interpolation)
-        this.t += (this.speed * delta) / 1000;
-
-        if (this.t >= 1) {
-            this.t = 0;
-            this.stationsPassed.clear();
-        }
-
-        // Interpolación suave entre puntos
-        const index = Math.floor(this.t * (this.path.length - 1));
-        const nextIndex = (index + 1) % this.path.length;
-        const localT = (this.t * (this.path.length - 1)) % 1;
-
-        const current = this.path[index];
-        const next = this.path[nextIndex];
-
-        if (current && next) {
-            // Interpolación lineal suave
-            const x = current.x + (next.x - current.x) * localT;
-            const y = current.y + (next.y - current.y) * localT;
-
-            this.sprite.setPosition(x, y);
-            this.particles.setPosition(x, y);
-
-            // Detectar paso por estación
-            this.checkStationPass(index, addMoneyCallback);
-        }
-    }
-
-    checkStationPass(index, callback) {
-        const key = `station_${index}`;
-        if (this.stationsPassed.has(key)) return;
-
-        const gridPos = this.path[index];
-        if (!gridPos) return;
-
-        // Aquí deberías verificar si la posición del grid es una estación
-        // y llamar al callback con las ganancias
-        this.stationsPassed.add(key);
-    }
-
-    updateSpeed(newSpeed) {
-        this.speed = newSpeed;
-    }
-
-    updatePath(newPath) {
-        this.path = newPath;
-        this.t = 0;
-        this.stationsPassed.clear();
-    }
-
-    destroy() {
-        this.sprite.destroy();
-        this.particles.destroy();
-    }
+  }
+  
+  destroy() {
+    this.sprite.destroy();
+    this.smokeEmitter.destroy();
+  }
 }

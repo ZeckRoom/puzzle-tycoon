@@ -7,17 +7,12 @@ import { useGameStore } from '../../store/gameStore.js';
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super('GameScene');
-    this.GRID_SIZE = 10;  // ← CAMBIADO DE 8 A 10
+    this.GRID_SIZE = 10;
     this.TILE_SIZE = 64;
     this.selectedTileType = 0;
   }
   
-  init(data) {
-    // Ya no necesitamos data.gameStore
-  }
-  
   preload() {
-    // Crear textura simple para partículas
     const graphics = this.make.graphics({ x: 0, y: 0, add: false });
     graphics.fillStyle(0xffffff);
     graphics.fillCircle(4, 4, 4);
@@ -43,18 +38,14 @@ export default class GameScene extends Phaser.Scene {
     graphics.lineStyle(2, 0xbdc3c7, 0.3);
     
     for (let i = 0; i <= this.GRID_SIZE; i++) {
-      // Líneas verticales
       graphics.moveTo(i * this.TILE_SIZE, 0);
       graphics.lineTo(i * this.TILE_SIZE, this.GRID_SIZE * this.TILE_SIZE);
-      
-      // Líneas horizontales
       graphics.moveTo(0, i * this.TILE_SIZE);
       graphics.lineTo(this.GRID_SIZE * this.TILE_SIZE, i * this.TILE_SIZE);
     }
     
     graphics.strokePath();
     
-    // Fondo con efecto blueprint
     const bg = this.add.rectangle(
       this.GRID_SIZE * this.TILE_SIZE / 2,
       this.GRID_SIZE * this.TILE_SIZE / 2,
@@ -67,7 +58,6 @@ export default class GameScene extends Phaser.Scene {
   }
   
   createDepot() {
-    // Depósito en posición inicial (0,0)
     const depot = this.createTileSprite(0, 0, TILE_TYPES.DEPOT);
     this.tiles['0,0'] = { sprite: depot, tileData: TILE_TYPES.DEPOT };
   }
@@ -78,7 +68,6 @@ export default class GameScene extends Phaser.Scene {
     
     const container = this.add.container(x, y);
     
-    // Fondo de la celda con efecto de profundidad
     const cellBg = this.add.rectangle(0, 0, 
       this.TILE_SIZE * 0.95, 
       this.TILE_SIZE * 0.95, 
@@ -86,95 +75,17 @@ export default class GameScene extends Phaser.Scene {
     cellBg.setStrokeStyle(1, 0x5a4a3a, 0.5);
     container.add(cellBg);
     
-    // Base del tile (plataforma)
     const platform = this.add.rectangle(0, 0, 
       this.TILE_SIZE * 0.85, 
       this.TILE_SIZE * 0.85, 
       0x3d2817, 0.4);
     container.add(platform);
     
-    // Dibujar los rieles según el tipo
-    const graphics = this.add.graphics();
-    graphics.lineStyle(4, tileData.color, 1);
+    // Dibujar vías mejoradas
+    const rails = this.add.graphics();
+    this.drawDetailedRails(rails, tileData);
+    container.add(rails);
     
-    const railOffset = this.TILE_SIZE * 0.35;
-    const railThickness = 3;
-    
-    // Vías según tipo de conexión
-    if (tileData.connects.left && tileData.connects.right) {
-      // Horizontal: dos líneas paralelas
-      graphics.fillStyle(0x4a4a4a, 1);
-      graphics.fillRect(-railOffset, -3, railOffset * 2, railThickness);
-      graphics.fillRect(-railOffset, 3, railOffset * 2, railThickness);
-      
-      // Traviesas (sleepers)
-      for (let i = -railOffset; i < railOffset; i += 8) {
-        graphics.fillStyle(0x5a3d2b, 1);
-        graphics.fillRect(i, -6, 4, 12);
-      }
-    }
-    
-    if (tileData.connects.up && tileData.connects.down) {
-      // Vertical: dos líneas paralelas
-      graphics.fillStyle(0x4a4a4a, 1);
-      graphics.fillRect(-3, -railOffset, railThickness, railOffset * 2);
-      graphics.fillRect(3, -railOffset, railThickness, railOffset * 2);
-      
-      // Traviesas
-      for (let i = -railOffset; i < railOffset; i += 8) {
-        graphics.fillStyle(0x5a3d2b, 1);
-        graphics.fillRect(-6, i, 12, 4);
-      }
-    }
-    
-    // Curvas con arco suave
-    if (tileData.connects.up && tileData.connects.right) {
-      graphics.lineStyle(railThickness, 0x4a4a4a, 1);
-      graphics.beginPath();
-      graphics.arc(railOffset, -railOffset, railOffset, Math.PI, Math.PI * 1.5, false);
-      graphics.strokePath();
-      
-      graphics.beginPath();
-      graphics.arc(railOffset - 6, -railOffset + 6, railOffset - 6, Math.PI, Math.PI * 1.5, false);
-      graphics.strokePath();
-    }
-    
-    if (tileData.connects.up && tileData.connects.left) {
-      graphics.lineStyle(railThickness, 0x4a4a4a, 1);
-      graphics.beginPath();
-      graphics.arc(-railOffset, -railOffset, railOffset, Math.PI * 1.5, Math.PI * 2, false);
-      graphics.strokePath();
-      
-      graphics.beginPath();
-      graphics.arc(-railOffset + 6, -railOffset + 6, railOffset - 6, Math.PI * 1.5, Math.PI * 2, false);
-      graphics.strokePath();
-    }
-    
-    if (tileData.connects.down && tileData.connects.right) {
-      graphics.lineStyle(railThickness, 0x4a4a4a, 1);
-      graphics.beginPath();
-      graphics.arc(railOffset, railOffset, railOffset, Math.PI * 0.5, Math.PI, false);
-      graphics.strokePath();
-      
-      graphics.beginPath();
-      graphics.arc(railOffset - 6, railOffset - 6, railOffset - 6, Math.PI * 0.5, Math.PI, false);
-      graphics.strokePath();
-    }
-    
-    if (tileData.connects.down && tileData.connects.left) {
-      graphics.lineStyle(railThickness, 0x4a4a4a, 1);
-      graphics.beginPath();
-      graphics.arc(-railOffset, railOffset, railOffset, 0, Math.PI * 0.5, false);
-      graphics.strokePath();
-      
-      graphics.beginPath();
-      graphics.arc(-railOffset + 6, railOffset - 6, railOffset - 6, 0, Math.PI * 0.5, false);
-      graphics.strokePath();
-    }
-    
-    container.add(graphics);
-    
-    // Icono especial para estación
     if (tileData.id === 'station') {
       const stationBg = this.add.rectangle(0, 0, this.TILE_SIZE * 0.7, this.TILE_SIZE * 0.7, 0x27ae60);
       stationBg.setStrokeStyle(3, 0x2ecc71);
@@ -195,25 +106,91 @@ export default class GameScene extends Phaser.Scene {
       container.add(icon);
     }
     
-    // Hover effect
     container.setInteractive(
       new Phaser.Geom.Rectangle(-this.TILE_SIZE / 2, -this.TILE_SIZE / 2, this.TILE_SIZE, this.TILE_SIZE),
       Phaser.Geom.Rectangle.Contains
     );
     
-    container.on('pointerover', () => {
-      container.setScale(1.05);
-    });
-    
-    container.on('pointerout', () => {
-      container.setScale(1);
-    });
+    container.on('pointerover', () => container.setScale(1.05));
+    container.on('pointerout', () => container.setScale(1));
     
     return container;
   }
   
+  drawDetailedRails(graphics, tileData) {
+    const r = this.TILE_SIZE * 0.35;
+    const thickness = 4;
+    const gap = 8;
+    
+    // Vías rectas horizontales
+    if (tileData.connects.left && tileData.connects.right) {
+      // Dos rieles paralelos
+      graphics.fillStyle(0x4a4a4a, 1);
+      graphics.fillRect(-r, -gap/2, r * 2, thickness);
+      graphics.fillRect(-r, gap/2, r * 2, thickness);
+      
+      // Traviesas de madera
+      for (let i = -r; i < r; i += 10) {
+        graphics.fillStyle(0x6b4423, 1);
+        graphics.fillRect(i - 2, -gap - 4, 6, gap * 2 + 8);
+      }
+    }
+    
+    // Vías rectas verticales
+    if (tileData.connects.up && tileData.connects.down) {
+      graphics.fillStyle(0x4a4a4a, 1);
+      graphics.fillRect(-gap/2, -r, thickness, r * 2);
+      graphics.fillRect(gap/2, -r, thickness, r * 2);
+      
+      for (let i = -r; i < r; i += 10) {
+        graphics.fillStyle(0x6b4423, 1);
+        graphics.fillRect(-gap - 4, i - 2, gap * 2 + 8, 6);
+      }
+    }
+    
+    // Curvas mejoradas con círculos de rieles
+    if (tileData.connects.up && tileData.connects.right) {
+      graphics.lineStyle(thickness, 0x4a4a4a, 1);
+      graphics.beginPath();
+      graphics.arc(r, -r, r - gap/2, Math.PI, Math.PI * 1.5, false);
+      graphics.strokePath();
+      graphics.beginPath();
+      graphics.arc(r, -r, r + gap/2, Math.PI, Math.PI * 1.5, false);
+      graphics.strokePath();
+    }
+    
+    if (tileData.connects.up && tileData.connects.left) {
+      graphics.lineStyle(thickness, 0x4a4a4a, 1);
+      graphics.beginPath();
+      graphics.arc(-r, -r, r - gap/2, Math.PI * 1.5, Math.PI * 2, false);
+      graphics.strokePath();
+      graphics.beginPath();
+      graphics.arc(-r, -r, r + gap/2, Math.PI * 1.5, Math.PI * 2, false);
+      graphics.strokePath();
+    }
+    
+    if (tileData.connects.down && tileData.connects.right) {
+      graphics.lineStyle(thickness, 0x4a4a4a, 1);
+      graphics.beginPath();
+      graphics.arc(r, r, r - gap/2, Math.PI * 0.5, Math.PI, false);
+      graphics.strokePath();
+      graphics.beginPath();
+      graphics.arc(r, r, r + gap/2, Math.PI * 0.5, Math.PI, false);
+      graphics.strokePath();
+    }
+    
+    if (tileData.connects.down && tileData.connects.left) {
+      graphics.lineStyle(thickness, 0x4a4a4a, 1);
+      graphics.beginPath();
+      graphics.arc(-r, r, r - gap/2, 0, Math.PI * 0.5, false);
+      graphics.strokePath();
+      graphics.beginPath();
+      graphics.arc(-r, r, r + gap/2, 0, Math.PI * 0.5, false);
+      graphics.strokePath();
+    }
+  }
+  
   setupInput() {
-    // Click para colocar tiles
     this.input.on('pointerdown', (pointer) => {
       const gridX = Math.floor(pointer.x / this.TILE_SIZE);
       const gridY = Math.floor(pointer.y / this.TILE_SIZE);
@@ -221,15 +198,18 @@ export default class GameScene extends Phaser.Scene {
       if (gridX < 0 || gridX >= this.GRID_SIZE || gridY < 0 || gridY >= this.GRID_SIZE) return;
       
       const key = `${gridX},${gridY}`;
-      
-      // No permitir sobrescribir el depósito
       if (key === '0,0') return;
       
-      // Si ya existe un tile, eliminarlo
+      // Eliminar tile con reembolso del 50%
       if (this.tiles[key]) {
+        const tileData = this.tiles[key].tileData;
+        const refund = Math.floor(tileData.cost * 0.5);
+        
         this.tiles[key].sprite.destroy();
         delete this.tiles[key];
         useGameStore.getState().removeTile(gridX, gridY);
+        useGameStore.getState().addMoney(refund);
+        
         this.validateAndUpdatePath();
         return;
       }
@@ -249,7 +229,6 @@ export default class GameScene extends Phaser.Scene {
   }
   
   createPreview() {
-    // Preview fantasma que sigue al cursor
     this.previewContainer = this.add.container(0, 0);
     this.previewContainer.setAlpha(0.6);
     this.previewContainer.setDepth(1000);
@@ -280,10 +259,8 @@ export default class GameScene extends Phaser.Scene {
   
   updatePreview() {
     this.previewContainer.removeAll(true);
-    
     const tileTypeName = TILE_SELECTOR[this.selectedTileType];
     const tileData = TILE_TYPES[tileTypeName];
-    
     const tempSprite = this.createTileSprite(0, 0, tileData);
     this.previewContainer.add(tempSprite);
   }
@@ -295,6 +272,9 @@ export default class GameScene extends Phaser.Scene {
     if (result.valid) {
       const smoothPath = validator.generateSmoothPath(result, this.TILE_SIZE);
       
+      // Calcular distancia total del camino
+      const pathDistance = this.calculatePathDistance(result.path);
+      
       if (!this.train) {
         this.train = new Train(this, smoothPath, useGameStore.getState().trainSpeed);
         this.train.start();
@@ -304,9 +284,12 @@ export default class GameScene extends Phaser.Scene {
       
       useGameStore.getState().setTrainRunning(true);
       
-      // Calcular ganancias por segundo
-      const earnings = result.stations * 100 * useGameStore.getState().multiplier;
-      useGameStore.getState().updateMoneyPerSecond(earnings);
+      // Ganancias basadas en distancia y estaciones
+      const baseEarnings = result.stations * 100;
+      const distanceBonus = pathDistance * 10; // $10 por celda de distancia
+      const totalEarnings = (baseEarnings + distanceBonus) * useGameStore.getState().multiplier;
+      
+      useGameStore.getState().updateMoneyPerSecond(totalEarnings);
       
     } else {
       if (this.train) {
@@ -317,18 +300,26 @@ export default class GameScene extends Phaser.Scene {
     }
   }
   
+  calculatePathDistance(path) {
+    let distance = 0;
+    for (let i = 1; i < path.length; i++) {
+      const dx = path[i].x - path[i-1].x;
+      const dy = path[i].y - path[i-1].y;
+      distance += Math.sqrt(dx * dx + dy * dy);
+    }
+    return Math.floor(distance);
+  }
+  
   createUI() {
-    // UI mínima en Phaser (ya tenemos React para el resto)
-    this.uiText = this.add.text(
-      10, 10,
-      '',
-      { fontSize: '12px', backgroundColor: '#2c3e50', padding: { x: 5, y: 3 } }
-    );
+    this.uiText = this.add.text(10, 10, '', { 
+      fontSize: '12px', 
+      backgroundColor: '#2c3e50', 
+      padding: { x: 5, y: 3 } 
+    });
     this.uiText.setDepth(100);
   }
   
   syncWithStore() {
-    // Cargar tiles desde el store
     const storedTiles = useGameStore.getState().tiles;
     Object.entries(storedTiles).forEach(([key, typeName]) => {
       const [x, y] = key.split(',').map(Number);
@@ -348,12 +339,10 @@ export default class GameScene extends Phaser.Scene {
         useGameStore.getState().addMoney(amount);
       });
       
-      // Actualizar velocidad del tren
       const currentSpeed = useGameStore.getState().trainSpeed;
       this.train.updateSpeed(currentSpeed);
     }
     
-    // Actualizar UI
     const tileTypeName = TILE_SELECTOR[this.selectedTileType];
     const tileData = TILE_TYPES[tileTypeName];
     this.uiText.setText(`Selected: ${tileData.name}`);

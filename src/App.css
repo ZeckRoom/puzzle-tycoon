@@ -16,14 +16,13 @@ body {
       transparent 2px,
       rgba(139, 69, 19, 0.03) 2px,
       rgba(139, 69, 19, 0.03) 4px
-    ),
-    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" /></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.05"/></svg>');
+    );
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .app-container {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: radial-gradient(circle at top, #f5ead6, #e8dcc4);
@@ -31,7 +30,7 @@ body {
 
 .app-header {
   background: linear-gradient(180deg, #8b6f47 0%, #6b5638 100%);
-  padding: 20px 40px;
+  padding: 15px 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -40,6 +39,7 @@ body {
     inset 0 -2px 0 rgba(255, 255, 255, 0.2),
     0 4px 20px rgba(0, 0, 0, 0.4);
   position: relative;
+  flex-shrink: 0;
 }
 
 .app-header::before {
@@ -59,7 +59,7 @@ body {
 
 .logo h1 {
   font-family: 'Cinzel', serif;
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 700;
   color: #d4af37;
   letter-spacing: 3px;
@@ -67,34 +67,34 @@ body {
   text-shadow: 
     2px 2px 0 #8b6914,
     4px 4px 8px rgba(0, 0, 0, 0.5);
-  position: relative;
 }
 
 .logo .subtitle {
   font-family: 'EB Garamond', serif;
-  font-size: 14px;
+  font-size: 12px;
   color: #f5e6d3;
   text-transform: uppercase;
-  letter-spacing: 4px;
+  letter-spacing: 3px;
   font-style: italic;
 }
 
 .main-content {
   flex: 1;
-  display: flex;
-  gap: 30px;
-  padding: 30px;
-  max-width: 1600px;
+  display: grid;
+  grid-template-columns: 680px 1fr;
+  gap: 20px;
+  padding: 20px;
+  overflow: hidden;
+  max-width: 1800px;
   margin: 0 auto;
   width: 100%;
 }
 
 .game-section {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-width: 700px;
+  gap: 15px;
+  height: 100%;
 }
 
 .game-canvas-container {
@@ -106,29 +106,10 @@ body {
     inset 0 0 0 8px #8b6f47,
     inset 0 0 0 12px #d4af37,
     inset 0 0 0 14px #8b6f47,
-    0 8px 32px rgba(0, 0, 0, 0.5),
-    0 0 40px rgba(212, 175, 55, 0.2);
+    0 8px 32px rgba(0, 0, 0, 0.5);
   border-radius: 4px;
   padding: 8px;
-}
-
-.game-canvas-container::before {
-  content: '';
-  position: absolute;
-  top: -20px;
-  left: -20px;
-  right: -20px;
-  bottom: -20px;
-  background: 
-    linear-gradient(135deg, transparent 10px, #6b5638 10px, #6b5638 12px, transparent 12px),
-    linear-gradient(225deg, transparent 10px, #6b5638 10px, #6b5638 12px, transparent 12px),
-    linear-gradient(-45deg, transparent 10px, #6b5638 10px, #6b5638 12px, transparent 12px),
-    linear-gradient(45deg, transparent 10px, #6b5638 10px, #6b5638 12px, transparent 12px);
-  background-size: 20px 20px;
-  background-position: bottom left, bottom right, top right, top left;
-  background-repeat: no-repeat;
-  pointer-events: none;
-  z-index: -1;
+  flex-shrink: 0;
 }
 
 .game-canvas-container canvas {
@@ -142,32 +123,20 @@ body {
 .controls-hint {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 20px;
+  gap: 8px;
+  padding: 15px;
   background: #f5ead6;
   border: 3px solid #8b6f47;
   border-radius: 8px;
   box-shadow: 
     inset 0 2px 0 rgba(255, 255, 255, 0.5),
     0 4px 12px rgba(0, 0, 0, 0.3);
-  position: relative;
-}
-
-.controls-hint::before {
-  content: '❦';
-  position: absolute;
-  top: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #f5ead6;
-  padding: 0 15px;
-  font-size: 20px;
-  color: #8b6f47;
+  flex-shrink: 0;
 }
 
 .controls-hint span {
   font-family: 'EB Garamond', serif;
-  font-size: 14px;
+  font-size: 13px;
   color: #5a4428;
   display: flex;
   align-items: center;
@@ -176,17 +145,16 @@ body {
 }
 
 .sidebar {
-  width: 420px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
   overflow-y: auto;
-  max-height: calc(100vh - 140px);
-  padding-right: 15px;
+  padding-right: 10px;
+  height: 100%;
 }
 
 .sidebar::-webkit-scrollbar {
-  width: 12px;
+  width: 10px;
 }
 
 .sidebar::-webkit-scrollbar-track {
@@ -200,10 +168,6 @@ body {
   border-radius: 10px;
   border: 2px solid #5a4428;
   box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
-}
-
-.sidebar::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #9b7f57, #7b6648);
 }
 
 .offline-popup {
@@ -222,18 +186,6 @@ body {
   animation: slideDown 0.5s ease-out;
 }
 
-.offline-popup::before {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  right: -2px;
-  bottom: -2px;
-  border: 2px solid #d4af37;
-  border-radius: 10px;
-  pointer-events: none;
-}
-
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -250,7 +202,6 @@ body {
   font-size: 18px;
   color: #5a4428;
   margin: 0 0 10px 0;
-  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
   text-align: center;
 }
 
@@ -261,45 +212,4 @@ body {
   margin: 0;
   font-weight: 600;
   text-align: center;
-}
-
-@media (max-width: 1400px) {
-  .main-content {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .sidebar {
-    width: 100%;
-    max-width: 640px;
-    max-height: none;
-  }
-  
-  .game-section {
-    width: 100%;
-    max-width: 640px;
-  }
-}
-
-@media (max-width: 768px) {
-  .app-header {
-    flex-direction: column;
-    gap: 20px;
-    padding: 20px;
-  }
-  
-  .main-content {
-    padding: 20px;
-  }
-  
-  .game-canvas-container {
-    width: 100% !important;
-    max-width: 640px;
-  }
-  
-  .game-canvas-container canvas {
-    width: 100% !important;
-    height: auto !important;
-    aspect-ratio: 1;
-  }
 }

@@ -7,7 +7,7 @@ import { useGameStore } from '../../store/gameStore.js';
 export default class GameScene extends Phaser.Scene {
   constructor() {
     super('GameScene');
-    this.GRID_SIZE = 8;
+    this.GRID_SIZE = 10;  // ← CAMBIADO DE 8 A 10
     this.TILE_SIZE = 64;
     this.selectedTileType = 0;
   }

@@ -12,12 +12,12 @@ export function GameCanvas() {
     const config = {
       type: Phaser.WEBGL,
       parent: containerRef.current,
-      width: 512,
-      height: 512,
+      width: 640,
+      height: 640,
       backgroundColor: '#ecf0f1',
       scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        mode: Phaser.Scale.NONE,  // ← Sin auto-escala
+        autoCenter: Phaser.Scale.NO_CENTER
       },
       physics: {
         default: 'arcade',
@@ -47,12 +47,6 @@ export function GameCanvas() {
     <div 
       ref={containerRef} 
       className="game-canvas-container"
-      style={{
-        border: '4px solid #f1c40f',
-        borderRadius: '12px',
-        overflow: 'hidden',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
-      }}
     />
   );
 }

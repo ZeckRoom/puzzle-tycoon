@@ -1,215 +1,157 @@
-@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700&family=Cinzel:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=IM+Fell+English+SC&family=Lato:wght@400;700&display=swap');
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+:root {
+  --layton-brown: #3e2723;
+  --layton-gold: #d4af37;
+  --layton-cream: #f5f5dc;
+  --layton-bg: #e8dcc4;
 }
 
 body {
-  font-family: 'EB Garamond', serif;
-  background: #e8dcc4;
-  background-image: 
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(139, 69, 19, 0.03) 2px,
-      rgba(139, 69, 19, 0.03) 4px
-    );
-  min-height: 100vh;
-  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden; /* PROHIBIDO EL SCROLL */
+  background: var(--layton-bg);
+  background-image: url('https://www.transparenttextures.com/patterns/aged-paper.png');
+  font-family: 'Lato', sans-serif;
+  color: var(--layton-brown);
 }
 
 .app-container {
+  display: grid;
+  grid-template-rows: 80px 1fr; /* Header fijo 80px, resto para juego */
   height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: radial-gradient(circle at top, #f5ead6, #e8dcc4);
+  max-width: 1400px;
+  margin: 0 auto;
+  box-shadow: 0 0 50px rgba(0,0,0,0.5);
 }
 
+/* HEADER ESTILO VICTORIANO */
 .app-header {
-  background: linear-gradient(180deg, #8b6f47 0%, #6b5638 100%);
-  padding: 15px 30px;
+  background: var(--layton-brown);
+  border-bottom: 4px solid var(--layton-gold);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 4px solid #5a4428;
-  box-shadow: 
-    inset 0 -2px 0 rgba(255, 255, 255, 0.2),
-    0 4px 20px rgba(0, 0, 0, 0.4);
-  position: relative;
-  flex-shrink: 0;
-}
-
-.app-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, 
-    transparent, 
-    #d4af37 20%, 
-    #d4af37 80%, 
-    transparent
-  );
+  padding: 0 40px;
+  z-index: 10;
 }
 
 .logo h1 {
   font-family: 'Cinzel', serif;
-  font-size: 28px;
-  font-weight: 700;
-  color: #d4af37;
-  letter-spacing: 3px;
+  color: var(--layton-gold);
+  font-size: 32px;
+  text-shadow: 2px 2px 0px black;
   margin: 0;
-  text-shadow: 
-    2px 2px 0 #8b6914,
-    4px 4px 8px rgba(0, 0, 0, 0.5);
 }
 
 .logo .subtitle {
-  font-family: 'EB Garamond', serif;
-  font-size: 12px;
-  color: #f5e6d3;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  font-style: italic;
+  font-family: 'IM Fell English SC', serif;
+  color: var(--layton-cream);
+  font-size: 14px;
 }
 
+/* MAIN CONTENT: GRID 2 COLUMNAS */
 .main-content {
-  flex: 1;
   display: grid;
-  grid-template-columns: 680px 1fr;
+  grid-template-columns: 660px 1fr; /* Columna juego fija, sidebar flexible */
   gap: 20px;
   padding: 20px;
   overflow: hidden;
-  max-width: 1800px;
-  margin: 0 auto;
-  width: 100%;
+  position: relative;
 }
 
+/* JUEGO: Centrado en su columna */
 .game-section {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  height: 100%;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
 .game-canvas-container {
-  width: 640px !important;
-  height: 640px !important;
-  position: relative;
-  background: #2c2416;
-  box-shadow: 
-    inset 0 0 0 8px #8b6f47,
-    inset 0 0 0 12px #d4af37,
-    inset 0 0 0 14px #8b6f47,
-    0 8px 32px rgba(0, 0, 0, 0.5);
-  border-radius: 4px;
-  padding: 8px;
-  flex-shrink: 0;
-}
-
-.game-canvas-container canvas {
-  display: block !important;
-  width: 640px !important;
-  height: 640px !important;
-  border-radius: 2px;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-.controls-hint {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 15px;
-  background: #f5ead6;
-  border: 3px solid #8b6f47;
+  width: 640px;
+  height: 640px;
+  border: 8px solid var(--layton-brown);
   border-radius: 8px;
   box-shadow: 
-    inset 0 2px 0 rgba(255, 255, 255, 0.5),
-    0 4px 12px rgba(0, 0, 0, 0.3);
-  flex-shrink: 0;
+    inset 0 0 20px rgba(0,0,0,0.5),
+    0 10px 20px rgba(0,0,0,0.3);
+  position: relative;
+  background: #2c3e50; /* Fondo oscuro para el canvas */
 }
 
-.controls-hint span {
-  font-family: 'EB Garamond', serif;
-  font-size: 13px;
-  color: #5a4428;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 600;
-}
-
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  overflow-y: auto;
-  padding-right: 10px;
-  height: 100%;
-}
-
-.sidebar::-webkit-scrollbar {
-  width: 10px;
-}
-
-.sidebar::-webkit-scrollbar-track {
-  background: #d4c4a8;
-  border-radius: 10px;
-  border: 2px solid #8b6f47;
-}
-
-.sidebar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #8b6f47, #6b5638);
-  border-radius: 10px;
-  border: 2px solid #5a4428;
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.2);
-}
-
-.offline-popup {
-  position: fixed;
-  top: 100px;
+/* BOTÓN DE DESPACHAR TREN (Flotante sobre el juego) */
+.dispatch-button-container {
+  position: absolute;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: #f5ead6;
-  padding: 25px 45px;
-  border: 4px solid #8b6f47;
-  border-radius: 8px;
-  box-shadow: 
-    inset 0 2px 0 rgba(255, 255, 255, 0.5),
-    0 8px 32px rgba(0, 0, 0, 0.5);
-  z-index: 10000;
-  animation: slideDown 0.5s ease-out;
+  z-index: 100;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
-.offline-popup h3 {
+.dispatch-btn {
+  background: linear-gradient(to bottom, #2ecc71, #27ae60);
+  border: 4px solid #fff;
+  border-radius: 50px;
+  padding: 15px 40px;
   font-family: 'Cinzel', serif;
-  font-size: 18px;
-  color: #5a4428;
-  margin: 0 0 10px 0;
-  text-align: center;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 10px 0 #1e8449, 0 20px 20px rgba(0,0,0,0.4);
+  transition: all 0.1s;
+  text-transform: uppercase;
+  animation: pulseButton 2s infinite;
 }
 
-.offline-popup p {
-  font-family: 'EB Garamond', serif;
-  font-size: 16px;
-  color: #6b5638;
-  margin: 0;
-  font-weight: 600;
-  text-align: center;
+.dispatch-btn:active {
+  transform: translateY(10px);
+  box-shadow: 0 0 0 #1e8449;
+}
+
+.dispatch-btn:disabled {
+  background: #95a5a6;
+  box-shadow: 0 10px 0 #7f8c8d;
+  cursor: not-allowed;
+  animation: none;
+  opacity: 0.5;
+}
+
+@keyframes pulseButton {
+  0% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.05); }
+  100% { transform: translateX(-50%) scale(1); }
+}
+
+/* SIDEBAR: Estilo Maletín/Diario */
+.sidebar {
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px dashed var(--layton-brown);
+  border-radius: 12px;
+  padding: 20px;
+  overflow-y: auto;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* UI COMPONENTS */
+.money-display-container, .train-status, .tile-picker {
+  background: var(--layton-cream);
+  border: 2px solid var(--layton-brown);
+  box-shadow: 5px 5px 0 rgba(0,0,0,0.1);
+  padding: 15px;
+  border-radius: 4px;
+}
+
+/* Arreglo TilePicker Grid */
+.tiles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 10px;
 }

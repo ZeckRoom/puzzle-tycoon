@@ -20,13 +20,27 @@ function App() {
   const [gameStarted, setGameStarted] = useState(false);
   const [selectedTile, setSelectedTile] = useState(TILE_SELECTOR[0]);
   
+  // Nuevo estado para el botón de despacho
+  const [canDispatch, setCanDispatch] = useState(false);
+  
   const [showOfflineEarnings, setShowOfflineEarnings] = useState(false);
   const [offlineAmount, setOfflineAmount] = useState(0);
   
   const money = useGameStore((state) => state.money);
   const calculateOfflineEarnings = useGameStore((state) => state.calculateOfflineEarnings);
-  const setMode = useGameStore((state) => state.setMode);
   
+  // Exponer función global para que Phaser active el botón
+  useEffect(() => {
+    window.setDispatchReady = (isReady) => {
+        setCanDispatch(isReady);
+    };
+    
+    // Limpieza al desmontar
+    return () => {
+        window.setDispatchReady = null;
+    };
+  }, []);
+
   useEffect(() => {
     // Calcular ganancias offline solo cuando el juego inicie
     if (gameStarted) {
@@ -103,6 +117,13 @@ function App() {
     }
   };
   
+  const handleDispatch = () => {
+    if (window.phaserGame?.scene?.scenes[0]) {
+        // Ejecutar lógica de tren en Phaser
+        window.phaserGame.scene.scenes[0].dispatchTrain();
+    }
+  };
+  
   const formatNumber = (num) => {
     if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`;
     if (num >= 1e3) return `$${(num / 1e3).toFixed(2)}K`;
@@ -132,8 +153,8 @@ function App() {
       {/* Offline Earnings Popup */}
       {showOfflineEarnings && (
         <div className="offline-popup">
-          <h3>¡Bienvenido de vuelta!</h3>
-          <p>Ganaste {formatNumber(offlineAmount)} mientras estabas fuera</p>
+          <h3>Welcome Back!</h3>
+          <p>You earned {formatNumber(offlineAmount)} while away.</p>
         </div>
       )}
       
@@ -141,24 +162,42 @@ function App() {
       <header className="app-header">
         <div className="logo">
           <h1>LOVE CORP</h1>
-          <span className="subtitle">Puzzle Tycoon</span>
+          <span className="subtitle">Railway Mystery</span>
         </div>
         <MoneyDisplay />
       </header>
       
-      {/* Main Content */}
+      {/* Main Content: Grid Layout */}
       <div className="main-content">
-        {/* Game Canvas */}
+        
+        {/* Columna Izquierda: Juego */}
         <div className="game-section">
           <TrainStatus />
-          <GameCanvas />
+          
+          <div style={{ position: 'relative' }}>
+            <GameCanvas />
+            
+            {/* Botón Flotante "Send Train" */}
+            <div className="dispatch-button-container">
+                <button 
+                    className="dispatch-btn" 
+                    // Si prefieres que siempre esté activo para probar, quita el disabled
+                    disabled={!canDispatch} 
+                    onClick={handleDispatch}
+                    title={!canDispatch ? "Connect a path first!" : "Launch the train!"}
+                >
+                    🚀 DEPART
+                </button>
+            </div>
+          </div>
+          
           <div className="controls-hint">
-            <span>💡 Select a rail type, then click to place</span>
-            <span>Click existing rail to remove</span>
+            <span>💡 Select a rail part from the right panel.</span>
+            <span>🖱️ Click grid to place. Click existing to remove (50% refund).</span>
           </div>
         </div>
         
-        {/* Sidebar */}
+        {/* Columna Derecha: Sidebar (Herramientas) */}
         <aside className="sidebar">
           <TilePicker 
             selectedTile={selectedTile}

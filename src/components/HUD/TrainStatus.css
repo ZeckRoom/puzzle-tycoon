@@ -1,61 +1,93 @@
-/* src/components/HUD/TrainStatus.css */
 .train-status {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  background: #f5ead6;
+  border: 3px solid #8b6f47;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 
+    inset 0 2px 0 rgba(255, 255, 255, 0.5),
+    0 4px 16px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.train-status::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 1px solid #d4af37;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.status-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #d4c4a8;
+}
+
+.status-header h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  color: #5a4428;
+  margin: 0;
+  font-weight: 700;
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .status-indicator {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-family: 'EB Garamond', serif;
+  font-size: 13px;
+  font-weight: 600;
+  border: 2px solid;
 }
 
-.status-light {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    box-shadow: 0 0 10px currentColor;
+.status-indicator.running {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #4caf50;
 }
 
-.status-light.active {
-    background: #2ecc71;
-    animation: pulse 2s infinite;
+.status-indicator.stopped {
+  background: #ffebee;
+  color: #c62828;
+  border-color: #e57373;
 }
 
-.status-light.inactive {
-    background: #95a5a6;
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-indicator.running .status-dot {
+  background: #4caf50;
+  box-shadow: 0 0 8px #4caf50;
+}
+
+.status-indicator.stopped .status-dot {
+  background: #e57373;
 }
 
 @keyframes pulse {
-
-    0%,
-    100% {
-        opacity: 1;
-    }
-
-    50% {
-        opacity: 0.5;
-    }
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.9); }
 }
 
 .train-info {
-    display: flex;
-    gap: 20px;
-}
-
-.info-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 14px;
-}
-
-.info-item .icon {
-    font-size: 18px;
+  font-family: 'EB Garamond', serif;
+  font-size: 14px;
+  color: #6b5638;
+  line-height: 1.8;
+  font-style: italic;
 }

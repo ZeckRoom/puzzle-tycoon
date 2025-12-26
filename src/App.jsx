@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useGameStore } from './store/gameStore.js';
-import { useGameStore } from './store/gameStore';
 import { GameCanvas } from './components/GameCanvas.jsx';
 import { MoneyDisplay } from './components/HUD/MoneyDisplay.jsx';
 import { TrainStatus } from './components/HUD/TrainStatus.jsx';

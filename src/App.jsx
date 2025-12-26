@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useGameStore } from './store/gameStore.js';
 import { LoadingScreen } from './components/LoadingScreen.jsx';
 import { MainMenu } from './components/MainMenu.jsx';
+import { SaveSlotSelector } from './components/SaveSlotSelector/SaveSlotSelector.jsx';
 import { GameCanvas } from './components/GameCanvas.jsx';
 import { MoneyDisplay } from './components/HUD/MoneyDisplay.jsx';
 import { TrainStatus } from './components/HUD/TrainStatus.jsx';
@@ -13,6 +14,9 @@ import './App.css';
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
+  const [showSaveSelector, setShowSaveSelector] = useState(false);
+  const [selectedMode, setSelectedMode] = useState(null);
+  const [currentSlot, setCurrentSlot] = useState(null);
   const [gameStarted, setGameStarted] = useState(false);
   const [selectedTile, setSelectedTile] = useState(TILE_SELECTOR[0]);
   
@@ -40,7 +44,30 @@ function App() {
     }, 30000);
     
     return () => clearInterval(saveInterval);
-  }, [gameStarted]);
+  }, [gameStarted, calculateOfflineEarnings]);
+  
+  // Auto-guardar el progreso en el slot actual
+  useEffect(() => {
+    if (gameStarted && currentSlot && selectedMode) {
+      const autoSaveInterval = setInterval(() => {
+        const STORAGE_KEY = `lovecorp_saves_${selectedMode}`;
+        const saves = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        const currentSave = saves[currentSlot];
+        
+        if (currentSave) {
+          const saveData = useGameStore.getState().getCurrentSaveData();
+          saves[currentSlot] = {
+            ...currentSave,
+            ...saveData,
+            lastPlayed: Date.now()
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(saves));
+        }
+      }, 10000);
+      
+      return () => clearInterval(autoSaveInterval);
+    }
+  }, [gameStarted, currentSlot, selectedMode]);
   
   const handleLoadComplete = () => {
     setIsLoading(false);
@@ -48,9 +75,23 @@ function App() {
   };
   
   const handleSelectMode = (mode) => {
-    setMode(mode);
+    setSelectedMode(mode);
     setShowMenu(false);
+    setShowSaveSelector(true);
+  };
+  
+  const handleSelectSlot = (slotId, saveData) => {
+    setCurrentSlot(slotId);
+    useGameStore.getState().loadFromSlot(saveData);
+    useGameStore.getState().setMode(selectedMode);
+    setShowSaveSelector(false);
     setGameStarted(true);
+  };
+  
+  const handleBackToMenu = () => {
+    setShowSaveSelector(false);
+    setShowMenu(true);
+    setSelectedMode(null);
   };
   
   const handleSelectTile = (tileName) => {
@@ -74,6 +115,16 @@ function App() {
   
   if (showMenu) {
     return <MainMenu onSelectMode={handleSelectMode} />;
+  }
+  
+  if (showSaveSelector) {
+    return (
+      <SaveSlotSelector 
+        mode={selectedMode}
+        onSelectSlot={handleSelectSlot}
+        onBack={handleBackToMenu}
+      />
+    );
   }
   
   return (
